@@ -1,0 +1,725 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Week 3.2: fetch, jwt, mongoDB</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-translucentGray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="799cfc95-71cc-4059-b413-c1e649bd1806" class="page sans"><header><h1 class="page-title">Week 3.2: fetch, jwt, mongoDB</h1><p class="page-description"></p></header><div class="page-body"><p id="26538639-3f84-4f12-ae30-30420140194c" class="">slides link: <a href="https://d2szwvl7yo497w.cloudfront.net/cohort-2/3/Week+-+3.2.pdf">week 3.2</a></p><p id="cc0fef42-c793-42ec-bc45-cbd19f059381" class="">
+</p><h3 id="6640b56f-66a1-4350-b57f-93d4a8890ccb" class="">Fetch api</h3><ul id="32ece684-c940-45cb-a4cd-e61fe11b36a8" class="bulleted-list"><li style="list-style-type:disc">Used for sending requests to the server from the frontend.</li></ul><ul id="cac27e1b-acdb-4dd9-9aa6-a41d470cd1f9" class="bulleted-list"><li style="list-style-type:disc">Simple code (it is get request by default)<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="702358e2-a88e-41e6-866d-a4a45f617c9b" class="code"><code class="language-JavaScript">async function logMovies() {
+  const response = await fetch(&quot;http://example.com/movies.json&quot;);
+  const data = await response.json();
+  console.log(data);
+}</code></pre></li></ul><ul id="30ec82b2-e19f-4e66-909c-60b67a5db40e" class="toggle"><li><details open=""><summary>fetch() accepts a second parameter, an init object to change the settings for the request sent.</summary><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="0c57810c-e9a4-473e-b58f-10f036533cf1" class="code"><code class="language-JavaScript">async function postData(url=&quot;&quot;, data={}) {
+  const response = await fetch(&quot;http://example.com/movies.json&quot;, {
+		  method: &#x27;POST&#x27;, 
+		  headers: {
+	      &quot;Content-Type&quot;: &quot;application/json&quot; // &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded&#x27;,
+	    },
+		  body: JSON.stringify(data) // body data type must match &quot;Content-Type&quot; header
+		}
+	);
+
+	const jsonRespose = await response.json();
+	console.log(jsonResponse);
+}</code></pre></details></li></ul><p id="d26f631e-6955-4112-b7ba-729557b04296" class="">
+</p><h3 id="ee809dda-7386-447f-9501-3727bbdccf57" class="">Authentication</h3><ul id="d18c7e96-d763-47c2-a87d-e3a4191a48cb" class="bulleted-list"><li style="list-style-type:disc">Hashing<ul id="8408ecf8-30b0-4e06-bcfa-ae2a9cd8df74" class="bulleted-list"><li style="list-style-type:circle">one-directional</li></ul><ul id="a8e78ba6-6643-44f7-8548-188cc8ce2f0b" class="bulleted-list"><li style="list-style-type:circle">with a given output, no one can find the input</li></ul></li></ul><hr id="388c1691-ae61-436a-80a5-794ea352c425"/><ul id="a60dbd81-0f18-45f9-83d9-00fa8d91d50a" class="bulleted-list"><li style="list-style-type:disc">Encryption<ul id="67526e29-b488-461c-a2cd-9d3c4ee99861" class="bulleted-list"><li style="list-style-type:circle">it is two-way</li></ul><ul id="efa5a8ba-4e8f-419a-a88e-e700c1121143" class="bulleted-list"><li style="list-style-type:circle">string is encripted using an enciption-key</li></ul><ul id="57a58b9e-f86e-478f-a8b6-70e9870be6af" class="bulleted-list"><li style="list-style-type:circle">string can be decripted using the same encription-key</li></ul></li></ul><hr id="74a3cfdf-02a0-4e3a-ae26-df8bfd208183"/><ul id="17f62580-6c6b-4fc6-b73e-0d8b72094b9e" class="bulleted-list"><li style="list-style-type:disc">Json web tokens<ul id="1bcf60ee-b274-46e4-b955-729ff8424b3b" class="bulleted-list"><li style="list-style-type:circle">It is neither hashing not encription</li></ul><ul id="411ddab1-3f0c-4e49-917d-5df70c66033b" class="bulleted-list"><li style="list-style-type:circle">With a given jwt any one can see the contents/ payload from which that token was created i.e. jwt can be decoded by anyone. (website: <a href="https://jwt.io/">jwt.io</a>)</li></ul><ul id="fc9d33b7-9fe8-4902-a1cc-f84493c92989" class="bulleted-list"><li style="list-style-type:circle">2 jwts can have same payload but they will be different if the secret used to create those 2 jwts were different</li></ul><ul id="5cacea12-4b00-42e5-92cf-fe09d6762f77" class="toggle"><li><details open=""><summary>Understanding with example</summary><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="e917f9ca-4b83-44eb-bc42-acdbb189a139" class="code"><code class="language-JavaScript">const payload = {
+	username: &quot;Ankit&quot;,
+}
+
+// server1
+const secret1 = &quot;secret1&quot;;
+const token1 = jwt.sign(payload, secret1);
+const payload = jwt.verify(token1, secret1);
+
+// server2
+const secret2 = &quot;secret2&quot;;
+const token2 = jwt.sign(payload, secret2);
+const payload = jwt.verify(token2, secret2);</code></pre><ul id="c7b3ee25-caf6-4026-bf39-5ec11f6ee60d" class="bulleted-list"><li style="list-style-type:disc">though token1 and token2 have same payload they will be different because of different secrets.</li></ul><ul id="31bf2d93-3977-4971-91f2-68ccaf34f5a8" class="bulleted-list"><li style="list-style-type:disc">if any token with same payload but signed with any other secret than secret1 is sent to server1 it would not work. <strong>verify() </strong>method checks if the token given was signed with the given secret.</li></ul><ul id="9f86c3b3-e5bb-4b48-95ff-b77d516a24d0" class="bulleted-list"><li style="list-style-type:disc">if anyone doesn’t know the secretKey of the server, even if they have the idea of payload they can’t send a correct token without the knowledge of secretKey. If they send a token signed by any other secret, <strong>verify()</strong> method will throw an exception. </li></ul></details></li></ul><ul id="9faf395d-a8d8-4c63-8362-5c9bde58542b" class="toggle"><li><details open=""><summary>3 parts of jwt</summary><ul id="c2a629df-3a61-4b57-8886-3b51565c6643" class="bulleted-list"><li style="list-style-type:disc"><strong>Header:</strong> Contains the type of token and the signing algorithm.<p id="f4d0ebaf-4d88-4676-943d-3a3aafdffe65" class="">Example: {&quot;alg&quot;: &quot;HS256&quot;, &quot;typ&quot;: &quot;JWT&quot;}</p></li></ul><ul id="298f5b8e-bf51-4f05-badd-982740564b00" class="bulleted-list"><li style="list-style-type:disc"><strong>Payload:</strong> Contains claims (statements about an entity).<p id="15c2cce3-e77e-4547-ac2f-7168ab981cfd" class="">Example: {&quot;username&quot;: &quot;Ankit&quot;, &quot;iat&quot;: 1516239022}</p></li></ul><ul id="a1718180-2f93-4766-8c7e-788595812022" class="bulleted-list"><li style="list-style-type:disc"><strong>Signature:</strong> Generated by combining encoded header, encoded payload, and a secret key using the specified algorithm.<p id="a8c39a4c-dc94-408c-9682-279686b147a0" class="">Example: HMACSHA256(base64UrlEncode(header) + &quot;.&quot; + base64UrlEncode(payload), secret)</p></li></ul><ul id="f724e8da-f630-4557-86ec-ebf473f3ae8d" class="bulleted-list"><li style="list-style-type:disc">when combined, the 3 parts form a complete jwt<p id="926e9e9e-3a56-472c-ba96-922b5b9e5ff6" class=""><mark class="highlight-red">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</mark>.<mark class="highlight-purple">eyJ1c2VybmFtZSI6IkFua2l0IiwiaWF0IjoxNTE2MjM5MDIyfQ</mark>.<mark class="highlight-blue">jUH6mwQx6U0cZByMP1avjKhUgys7KS5jKWPyF4-2ljE</mark></p></li></ul></details></li></ul><ul id="5ecd4785-cd2e-45ea-8b9c-7d06c8c7bacd" class="bulleted-list"><li style="list-style-type:circle">using library <strong>jsonwebtoken</strong><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="64af8b3e-2d2f-4f10-aac4-6de319360a69" class="code"><code class="language-JavaScript">const jwt = require(&#x27;jsonwebtoken&#x27;);
+
+// important mehtods to know
+const token = jwt.sign(payload, secret); // to generate token
+const payload = jwt.verify(token, secret); // to verify the token and get back payload</code></pre></li></ul></li></ul><hr id="47b6bd67-8c22-4857-8c6e-09f62f322a71"/><ul id="e336317d-185b-4470-9d17-3ee57cde19ef" class="bulleted-list"><li style="list-style-type:disc">Local storage<ul id="706582f5-98fb-445c-b645-263f651dfab3" class="bulleted-list"><li style="list-style-type:circle">A place in your browser where you can store some data</li></ul><ul id="6b544044-27ef-4869-be16-2f6356788ed1" class="bulleted-list"><li style="list-style-type:circle">Usually things that are stored include - Authentication tokens, User language preference, User theme preference</li></ul></li></ul><h3 id="779e8bbe-38d1-4b89-aee8-a70c76439bfa" class="">MongoDB</h3><ul id="b0cfbdec-783d-4213-ab99-6c501915823a" class="toggle"><li><details open=""><summary>Use mongoose (a library) to connect backend server with mongoDB (a noSql DB)</summary><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="4542bac7-50b5-493f-8441-73a1172482e4" class="code"><code class="language-JavaScript">mongoose
+  .connect(&quot;mongodb_url&quot;)
+  .then(() =&gt; {
+    console.log(&quot;Connection to the database is established&quot;);
+
+    /*  app.listen(port, () =&gt; {
+        console.log(`Server listening on port ${port}`);
+      }); */
+  })
+  .catch((err) =&gt; console.log(&quot;Error connecting to the database&quot;));</code></pre></details></li></ul><ul id="96e294d1-587c-47be-99f8-39ae27bfb2ce" class="bulleted-list"><li style="list-style-type:disc">Using Mongoose<ul id="6f217bc6-8f7b-4a4a-ba1a-e707c5dfa659" class="bulleted-list"><li style="list-style-type:circle">create a schema using <strong>mongoose.schema()</strong>. <br/>Schema is a blueprint/ structure of the data which we will be storing in mongoDb<br/><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="323c1c9d-7792-435e-a27a-ae13f68fc623" class="code"><code class="language-JavaScript">const todoSchema = mongoose.Schema({
+  title: String,
+  description: String,
+  completed: Boolean,
+});</code></pre></li></ul><p id="b3477079-0e76-4db7-bec2-34034f44a9e7" class="">
+</p><ul id="8a012d5d-ab12-468d-81c1-cc81ccdc04d1" class="bulleted-list"><li style="list-style-type:circle">create a model using <strong>mongoose.model()</strong><br/>A model is a class with which we construct documents<br/><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="9d4d58cd-a3ab-4698-8389-c86639ccfd6b" class="code"><code class="language-JavaScript">const Todo = mongoose.model(&quot;Todo&quot;, todoSchema); </code></pre><p id="c4b1fe97-6a66-464f-9a87-2d25d309fca9" class="">const <mark class="highlight-blue">Todo </mark>= <strong>mongoose</strong>.<strong>model</strong>(<mark class="highlight-red">&quot;Todo&quot;</mark>, todoSchema);</p><ul id="12a03dcf-9071-4d27-98f3-11bb29b8ac49" class="bulleted-list"><li style="list-style-type:square"><mark class="highlight-blue">Todo - class we will use to construct documents</mark></li></ul><ul id="8f05e70a-5523-40cf-82fd-6cbcf9b92b5b" class="bulleted-list"><li style="list-style-type:square"><mark class="highlight-red">Todo - name of the collection in the singular form, mongoose will automatically create collection in the DB with lower case plural form name. Here collection will be created with </mark><em><mark class="highlight-red">todos</mark></em><mark class="highlight-red"> name</mark></li></ul><ul id="2f6c1404-e015-4097-9dbc-5a4da460dc02" class="bulleted-list"><li style="list-style-type:square">constructed documents are stored in this collection</li></ul></li></ul><p id="b158a4d7-cd4f-4f3f-8e71-026b9ee73108" class="">
+</p><ul id="41fa8245-1ce1-4e50-bda0-5f6dc9fd0ed0" class="bulleted-list"><li style="list-style-type:circle">Implement CRUD operations using Model APIs, refer mongoose documentation.</li></ul></li></ul></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

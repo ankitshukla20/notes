@@ -1,0 +1,797 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Week 7.2: recoil and zustand</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-translucentGray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="3a6588d4-0853-4b14-9f19-d190511bdc5c" class="page sans"><header><h1 class="page-title">Week 7.2: recoil and zustand</h1><p class="page-description"></p></header><div class="page-body"><p id="3dc3fe19-88c3-4b28-ad71-5fa4f5de286d" class="">slides link: <a href="https://d2szwvl7yo497w.cloudfront.net/cohort-2/7/Week%207.2%20Context%20API%20State%20Management,%20Recoil.pdf">week 7.2</a></p><p id="1e5601ec-3dd7-4598-a9e9-2e6aff3f2bda" class="">
+</p><p id="809fa15c-af9a-42ec-b7fb-95dc79214e29" class="">Untill now we were writing our state logic inside components only but<br/>We can seperate our front-end code into 2 parts<br/></p><ul id="dcb6860d-25ae-4f4b-b9c5-99821e75e8d6" class="bulleted-list"><li style="list-style-type:disc">Components - deal with ui logic</li></ul><ul id="18092c5b-4c43-4f5c-829c-232c3e1f7f2f" class="bulleted-list"><li style="list-style-type:disc">State management - state logic and backend calls defined outside of components</li></ul><p id="651dcfcd-8e0a-44c3-917e-5821ff74ad35" class="">
+</p><p id="bfb205ae-e7b3-45a0-9192-bca6fdcf681b" class=""><span style="border-bottom:0.05em solid">Problem Statement </span>: Suppose we want to create a counter app which shows the counter and has 2 buttons<br/>- for incrementing the count<br/>- for reseting the count<br/>and buttons should not re-render.<br/></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="3b822207-8b68-4710-a6c3-d1a18e15faa8" class="code"><code class="language-JavaScript">function App() {
+	return (
+		&lt;Count /&gt;  // shows the value of the counter
+		&lt;Buttons /&gt; // has 2 butons, 1 to increment and 1 to reset the value
+	)
+}</code></pre><p id="d5dd90db-094f-4c33-ab0b-16d608b7dad5" class="">
+</p><h3 id="5cb1cd10-1303-4c4d-9c01-2e1e45b12482" class="">Recoil</h3><p id="9513fe62-d056-42d4-81a7-65596dbaa90d" class="">Installation</p><ul id="9473b324-d9d0-4ec0-abe3-108db88841c9" class="bulleted-list"><li style="list-style-type:disc"><code>npm install recoil</code></li></ul><ul id="8ea5e212-46b0-4c4c-bb8a-91e13ccb874d" class="bulleted-list"><li style="list-style-type:disc">Components which will use recoil state, need to be wrapped inside <code>RecoilRoot</code><em> </em>component somewhere in the parent tree. So just put this in your root component.</li></ul><p id="4bd9261f-229c-404f-87b5-b40851a53d08" class="">
+</p><ul id="5066ad20-c106-4823-9917-1a2c042734cf" class="toggle"><li><details open=""><summary>Creating Atoms</summary><ul id="3b664d3b-ef38-41da-a8e6-2930f151bf15" class="bulleted-list"><li style="list-style-type:disc">atom - Recoil people decided to give another name to <em>state variables</em> that is <em>atoms</em></li></ul><ul id="6dc48593-c9ba-436c-b420-48becae288b9" class="bulleted-list"><li style="list-style-type:disc">Atoms generally are defined outside of components in a seperate file. <em>store(folder)/atoms.js. </em></li></ul><ul id="4a027921-9afa-48e9-bd13-ac59d0e3de8f" class="bulleted-list"><li style="list-style-type:disc">This file work as a single source of truth for the application&#x27;s state (data), and from here we can pass state (data) to any component which requires it. (eg: number of items in cart, user details, etc to render on navbar and in other components)</li></ul><ul id="ee9e2782-8c04-46f9-b5fe-811658a7405c" class="bulleted-list"><li style="list-style-type:disc">Initializing an atom<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="1536c684-9787-4c45-a5ba-43b337305e64" class="code"><code class="language-JavaScript">import { atom } from &#x27;recoil&#x27;;
+
+export const countState = atom({
+	key: &quot;countState&quot;,   // unique ID (with respect to other atoms/selectors)
+	default: 0,          // initial value
+});
+
+// const stateArray = useState(0);</code></pre><p id="5ae1e8c5-c1e0-45ee-a8d7-62b1df0fdd12" class="">key can be anything, it’s for recoil. It’s name is meaningless to us as long as we give it a unique name.</p><p id="a8474ac2-a0ec-4c7e-8538-0802bfe36a4d" class="">
+</p></li></ul></details></li></ul><ul id="462135c0-b302-457d-81b0-fe109e4dba6d" class="toggle"><li><details open=""><summary>Reading from <em>and</em> writing to an atom</summary><ul id="c81942c7-d8a0-46db-b4a3-d6923711f2e4" class="bulleted-list"><li style="list-style-type:disc">Using hooks, given by recoil, atoms can be read from and written to from any component.<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="d1981d4b-2faa-4672-ba39-a4041cff0bf1" class="code"><code class="language-JavaScript">function Component() {
+	const [count, setCount] = useRecoilState(countState);
+	// const [count, setCount] = useState(0);
+
+	return (&lt;div&gt;... &lt;/div&gt;)
+}
+
+// To just read from atom
+	const count = useRecoilValue(countState);
+	// const count = stateArray[0];
+
+// To just write to atom
+	const setCount = useSetRecoilState(countState);
+	// const setCount = stateArray[1]; </code></pre></li></ul><ul id="aa7aa483-7e3b-41ef-83c2-50342d6e2f1a" class="bulleted-list"><li style="list-style-type:disc">Components that <strong>read</strong> the value of an atom are implicitly <strong>subscribed</strong> to that atom, any atom updates will result in a re-render of only those components which were subscribed to that atom.</li></ul><ul id="ebb375b4-7ee1-4d9a-b106-f538dffab228" class="bulleted-list"><li style="list-style-type:disc">Components that only write to an atom are not subscribed to that atom</li></ul><p id="b0879de4-0717-4555-9d37-31a86e17e158" class="">
+</p></details></li></ul><p id="f5f89119-dd8e-45fc-b1f8-f5be727c5fe7" class="">
+</p><ul id="b3ca77d8-96f5-48ff-a71b-5ef88e1262f8" class="toggle"><li><details open=""><summary>Solution</summary><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="c21de6f7-5525-4406-8a6e-14b06130b9f9" class="code"><code class="language-JavaScript">function App() {
+	return (
+		&lt;RecoilRoot&gt;
+      &lt;Count /&gt;
+			&lt;Buttons /&gt; 
+    &lt;/RecoilRoot&gt;
+	);
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="860dbbf2-80f9-4132-8ad8-d2a747850da9" class="code"><code class="language-JavaScript">import { atom } from &#x27;recoil&#x27;;
+
+export const countState = atom({
+	key: &quot;countState&quot;,
+	default: 0,   
+});</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="5dd0bd45-d9fa-4669-9f98-29d95827dcf5" class="code"><code class="language-JavaScript">function Count() {
+	const count = useRecoilValue(countState);
+
+	return &lt;h1&gt;Counter: {count}&lt;/h1&gt;;
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="5a7f2254-d03d-49b7-82e9-d0d125f8715b" class="code"><code class="language-JavaScript">function Buttons() {
+	const setCount = useSetRecoilState(countState)
+
+	const increment = () =&gt; {
+    setCount((prev) =&gt; (prev + 1));
+  };
+  const reset = () =&gt; {
+    setCount(0);
+  };
+
+	return (
+    &lt;div&gt;
+      &lt;button onClick={increment}&gt;Increment&lt;/button&gt;
+      &lt;button onClick={reset}&gt;Reset&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre></details></li></ul><p id="707711e9-c177-4120-9ede-229cdff8a859" class="">
+</p><h3 id="86d5c821-873b-4326-8388-6b3089815ce8" class="">Zustand</h3><p id="05282826-ffdd-4a81-8aef-87278a743cae" class="">Installation</p><ul id="aecc63db-dd26-486c-9de8-eb485449834e" class="bulleted-list"><li style="list-style-type:disc"><code>npm install zustand</code></li></ul><p id="5c77b3c2-2ace-4955-a171-0b3987c33931" class="">
+</p><ul id="be0bbe6a-f30a-4235-a8bd-e5f1537ff1f0" class="toggle"><li><details open=""><summary>Create a store</summary><ul id="f85c47e8-e4f6-4784-96fc-9e8eb7110988" class="bulleted-list"><li style="list-style-type:disc">a &quot;store&quot; refers to a centralized container for managing the state of a React application.</li></ul><ul id="6f6e25b1-0c65-41f6-a631-b36cfb97a017" class="bulleted-list"><li style="list-style-type:disc">In a different file from components, say <em>store.js</em>. </li></ul><ul id="34c50189-f709-48ca-bf7e-b78874fb22e0" class="bulleted-list"><li style="list-style-type:disc">Use <code>create()</code> from zustand to make a store.</li></ul><ul id="d028a091-477b-4169-88fd-2026e4bfaaa4" class="bulleted-list"><li style="list-style-type:disc">In this create function, we pass an arrow function.<br/>This arrow function <br/>- should have a parameter <br/><code>set</code>, which is a function for updating the state of the store<br/>- should return an object which is the initial state of the store<br/><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="22d916c7-fbc0-4860-9075-3a72e1f479d8" class="code"><code class="language-JavaScript">const useExampleStore = create( (set) =&gt; ({}) );
+
+// {} returning object, that&#x27;s why inside paranthesis</code></pre></li></ul><ul id="1b876035-5a48-4517-a2c1-3343aaf3f108" class="bulleted-list"><li style="list-style-type:disc">Define the initial state variables<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="750887d6-0f55-4c57-9fa6-6fd0d7476086" class="code"><code class="language-JavaScript">const useExampleStore = create((set) =&gt; ({
+  count: 0,
+  username: &#x27;&#x27;,
+}));</code></pre></li></ul><ul id="46b361b3-c4fd-4e27-87ad-87c87b701d99" class="bulleted-list"><li style="list-style-type:disc">Define functions to update state <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="96590978-9ace-42a2-90ef-daa711851adb" class="code"><code class="language-JavaScript">const useExampleStore = create((set) =&gt; ({
+  count: 0,
+  username: &#x27;&#x27;,
+  increment: () =&gt; set((state) =&gt; ({ count: state.count + 1 })),
+  setUsername: (name) =&gt; set(() =&gt; ({ username: name })),
+  // setUsername: (name) =&gt; set({ username: name }),
+}));</code></pre><p id="ec90bc9e-6a3b-44c3-8eb4-66d67a8680e0" class="">Inside set function pass an arrow function,<br/>this arrow function <br/>- should take current state as it’s input and <br/>- return an object with updated properties of state. <br/></p></li></ul><ul id="d3811934-7be3-40da-ba04-1f233ae9fba8" class="toggle"><li><details open=""><summary>Understanding set()</summary><ul id="7e497171-4d50-4237-b296-76fcad7adf80" class="bulleted-list"><li style="list-style-type:disc">The <strong>set()</strong> function <em>merges</em> state. <br/>what that means is in the returning object, we can just pass the updated part of the state, we don’t need to use spread operator to copy the other properties of state. <br/><em>set</em> function will merge these updated properties into our next state object</li></ul><ul id="6080e925-a698-45fa-b81a-2d183b96d46d" class="bulleted-list"><li style="list-style-type:disc"><code>set((state) =&gt; ({ count: state.count + 1 }))</code> ✅<br/><br/><code>set((state) =&gt; ({ …state, count: state.count + 1 }))</code> ❌, it’s not entirely wrong but unnecessary and can lead to unexpected behavior.<ul id="69a00318-5701-4873-bf2d-29312c46d655" class="toggle"><li><details open=""><summary>In a normal react app</summary><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="9013ef22-223b-4659-960d-e3aa113f82a5" class="code"><code class="language-JavaScript">const [state, setState] = useState({
+    count: 0,
+    username: &#x27;&#x27;,
+  });
+
+  const increment = () =&gt; {
+    setState((prevState) =&gt; ({
+      ...prevState,
+      count: prevState.count + 1,
+    }));
+  };
+
+  const handleUsernameChange = (e) =&gt; {
+    const { value } = e.target;
+    setState((prevState) =&gt; ({
+      ...prevState,
+      username: value,
+    }));
+  };</code></pre></details></li></ul></li></ul><ul id="2838e8f8-de6e-485c-a86f-26ca49d5060a" class="bulleted-list"><li style="list-style-type:disc">If new state doesn’t depend on previous state values<br/><br/><code>set(() ⇒ ({username: name}))</code> ✅, remove state from input parameter<br/><br/><code>set({ username: name })</code> ✅, just write an object with updated property(ies) </li></ul></details></li></ul></details></li></ul><ul id="898de0f7-1bd3-4d3d-837d-1cb537c0d8f1" class="toggle"><li><details open=""><summary>Bind your components</summary><p id="7e770f7b-2ecf-42a9-927d-25171408c1ca" class="">Inside a component</p><ul id="7dd87643-0088-47d8-8ca0-2c09423c751c" class="bulleted-list"><li style="list-style-type:disc">import useExampleStore</li></ul><ul id="7d591655-cfd9-42d0-9a0d-116b614e4f9d" class="bulleted-list"><li style="list-style-type:disc"><code>const store = useExampleStore();<br/><br/></code>store is an object with all the properties of the useExampleStore</li></ul><ul id="97872a47-2c70-459d-a3bf-ff3190aaabdb" class="bulleted-list"><li style="list-style-type:disc"><code>const {count, username, increment, setUsername} = useExampleStore();</code> ✅</li></ul></details></li></ul><p id="17a46d02-348d-497c-9f3c-2844c5a2755f" class="">
+</p><ul id="1f80d9c8-a2d2-4337-980b-32987e32c8b8" class="toggle"><li><details open=""><summary>Solution</summary><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="519d0723-d6d5-497d-9143-8fccbcb75c82" class="code"><code class="language-JavaScript">import { create } from &quot;zustand&quot;
+
+const useCountStore = create((set) =&gt; ({
+	count: 0,
+	increment: () =&gt; set((state) =&gt; ({count: state.count + 1})),
+	reset: () =&gt; set(() =&gt; ({count: 0})),
+}));
+
+export default useCountStore;</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="7f95d352-bc1e-4788-a7be-f57c784416bf" class="code"><code class="language-JavaScript">import useCountStore from &quot;./counterStore&quot;;
+
+function Count() {
+	const {count} = useCountStore();
+
+	return &lt;h1&gt;Counter: {count}&lt;/h1&gt;;
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="a6a31315-7c74-4bd8-aede-2cb77e28e009" class="code"><code class="language-JavaScript">import useCountStore from &quot;./counterStore&quot;;
+
+function Buttons() {
+	const {increment, reset} = useCountStore();
+
+	return (
+    &lt;div&gt;
+      &lt;button onClick={increment}&gt;Increment&lt;/button&gt;
+      &lt;button onClick={reset}&gt;Reset&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre></details></li></ul></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

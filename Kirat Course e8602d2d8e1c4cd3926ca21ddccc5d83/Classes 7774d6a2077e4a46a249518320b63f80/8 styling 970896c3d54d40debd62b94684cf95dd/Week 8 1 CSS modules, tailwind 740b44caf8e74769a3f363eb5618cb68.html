@@ -1,0 +1,722 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Week 8.1: CSS modules, tailwind</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-translucentGray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="740b44ca-f8e7-4769-a3f3-63eb5618cb68" class="page sans"><header><h1 class="page-title">Week 8.1: CSS modules, tailwind</h1><p class="page-description"></p></header><div class="page-body"><p id="c65760b6-bbd0-40ba-862c-147f099dc2be" class="">slides link: <a href="https://d2szwvl7yo497w.cloudfront.net/cohort-2/8/8%20Tailwind.pdf">week 8.1</a></p><p id="54210ec1-e017-4a40-a438-92090c522f4a" class="">
+</p><p id="59ae6e37-abbe-4993-be0e-94284f199aa8" class=""><code>className</code> in JSX is the replacement for <code>class</code> in HTML.<br/><br/><code>class</code> is a reserved keyword in javascript.</p><details open=""><summary style="font-weight:600;font-size:1.25em;line-height:1.3;margin:0">CSS stylesheets</summary><div class="indented"><ul id="3027cab2-b6a2-4593-baee-9ebd6e327eff" class="bulleted-list"><li style="list-style-type:disc">create a CSS file with the same name as it’s corresponding component. (It’s a convention)</li></ul><ul id="2b542681-4daf-453c-b14b-5046a6e64b17" class="bulleted-list"><li style="list-style-type:disc">import that file in the component and use classes as in usual HTML</li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="6d0269ed-12aa-4dee-8ef5-5b20eaf4bba8" class="code"><code class="language-CSS">/* Heading.css */
+.heading {
+  color: red;
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="ec33b4f2-41c1-4f40-985d-c10f7ce7d397" class="code"><code class="language-JavaScript">import &quot;./Heading.css&quot;;
+
+const Heading = () =&gt; {
+  return &lt;div className=&quot;heading&quot;&gt;YOUR APP NAME&lt;/div&gt;;
+};
+
+export default Heading;</code></pre></div></details><details open=""><summary style="font-weight:600;font-size:1.25em;line-height:1.3;margin:0">CSS modules</summary><div class="indented"><p id="d5f0ba7d-3dfe-4f4f-b2bf-67c276e5eb62" class="">Better way to write CSS for components.</p><ul id="769d73da-1fa3-4d85-a00f-19233f4a9d18" class="toggle"><li><details open=""><summary>used to prevent <em>css classes</em> from clashing and overwiting.</summary><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="eec30fc7-ccb6-4c71-baaa-ab12bcc613df" class="code"><code class="language-CSS">/* App.css */
+.heading {
+  background-color: #888;
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="b32c30f7-7a17-4c57-b4c2-3d3e8120eb85" class="code"><code class="language-JavaScript">import &quot;./App.css&quot;;
+import Heading from &quot;./Heading&quot;;
+
+function App() {
+  return (
+    &lt;&gt;
+      &lt;Heading /&gt;
+    &lt;/&gt;
+  );
+}
+
+export default App;
+</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="64d260e3-e364-4210-a1d3-433a7071f361" class="code"><code class="language-CSS">/* Heading.css */
+.heading {
+  color: red;
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="1087ba03-ab47-4562-bbee-f505cdd87541" class="code"><code class="language-JavaScript">import &quot;./Heading.css&quot;;
+
+const Heading = () =&gt; {
+  return &lt;div className=&quot;heading&quot;&gt;YOUR APP NAME&lt;/div&gt;;
+};
+
+export default Heading;</code></pre><p id="45d05f6c-c3d9-4f7b-86ee-5b6f032927c8" class=""><em>Output:</em></p><figure id="08fc4ee1-6ecd-4c1e-ac16-96a59eb166e8" class="image"><a href="Week%208%201%20CSS%20modules,%20tailwind%20740b44caf8e74769a3f363eb5618cb68/Screenshot_2024-02-25_202217.png"><img style="width:343px" src="Week%208%201%20CSS%20modules,%20tailwind%20740b44caf8e74769a3f363eb5618cb68/Screenshot_2024-02-25_202217.png"/></a></figure><p id="0ceb550e-84b9-4ea3-8aef-eb916eb8da4e" class="">In CSS, the styles cascade, which means that styles can be inherited from parent elements. <br/>To avoid this kind of unintended styling, it&#x27;s a good practice to use unique class names or use more specific selectors.<br/></p></details></li></ul><ul id="293d823f-35d5-43d1-bc31-41e32bcb7a08" class="toggle"><li><details open=""><summary>using css modules</summary><ul id="7a45135c-640b-488f-aaa4-2293b29c583f" class="bulleted-list"><li style="list-style-type:disc">rename the css file. <br/><br/><em>Heading.css</em> to <em>Heading.module.css</em></li></ul><ul id="4221c160-ff86-4dab-8dee-9130bb4dc899" class="bulleted-list"><li style="list-style-type:disc">change the import statement<br/>from <br/><code>import &quot;./Heading.css&quot;;<br/><br/></code>to <code>import styles from &quot;./Heading.module.css&quot;;</code></li></ul><ul id="f5a4fa58-99ed-4225-a4ab-1046d7808002" class="bulleted-list"><li style="list-style-type:disc"><strong>styles</strong> is a js object that has all the classes we have defined in the <em>Heading.module.css</em> file as it’s properties. </li></ul><ul id="b4e188ea-4370-4faa-a2f6-af47b6955bac" class="bulleted-list"><li style="list-style-type:disc">Add these styles’ properties to an element:<br/><br/><code>&lt;div </code><code><em>className</em></code><code>={styles.heading}&gt;YOUR APP NAME&lt;/div&gt;;</code></li></ul><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="524a1230-755b-4b10-96b6-74e60b17ab2d" class="code"><code class="language-CSS">/* Heading.module.css */
+.heading {
+  color: red;
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="cecee364-036e-4e76-b703-a8e12644d9aa" class="code"><code class="language-JavaScript">import styles from &quot;./Heading.module.css&quot;;
+
+const Heading = () =&gt; {
+  return &lt;div className={styles.heading}&gt;YOUR APP NAME&lt;/div&gt;;
+};
+
+export default Heading;</code></pre><p id="bc30d614-ded3-4671-9ff9-00ea13b9b361" class=""><em>Output:</em></p><figure id="d998bda5-9de4-4d3f-a4bf-e439819001d3" class="image"><a href="Week%208%201%20CSS%20modules,%20tailwind%20740b44caf8e74769a3f363eb5618cb68/Screenshot_2024-02-25_212736.png"><img style="width:201px" src="Week%208%201%20CSS%20modules,%20tailwind%20740b44caf8e74769a3f363eb5618cb68/Screenshot_2024-02-25_212736.png"/></a></figure><p id="d1e2f267-94ca-4b65-b174-a146d7a2d083" class="">If you inpect it: <br/>&lt;div class=&quot;<br/><strong>_heading_1bb2y_1</strong>&quot;&gt;YOUR APP NAME&lt;/div&gt;<br/>and<br/>._heading_1bb2y_1 {<br/>    color: red;<br/>}<br/></p><p id="a2892393-5b2d-4bf2-b2af-4be231aa6f86" class=""><em>class</em> is not <em>heading</em>, it’s encoded.</p><p id="8de26f00-f7a8-4892-b396-b51fc41ba334" class="">
+</p><ul id="ddbc9649-5e14-4892-95e9-7e1f77295416" class="bulleted-list"><li style="list-style-type:disc">It’s preferred to use camelCasing when writing css classes inside this css module file. Or else we will have to use square brackets (instead of dot notation) to access those classes/ styles’ properties. <em><code>className</code></em><code>={styles[main-heading]}</code></li></ul></details></li></ul><ul id="68cec71b-4402-42b2-9656-98ef9d6e2bc8" class="toggle"><li><details open=""><summary>working of css modules </summary><ul id="d0bc2016-be85-4dcb-9a5e-9389f160a602" class="bulleted-list"><li style="list-style-type:disc">When building our application, build tools (like webpack, vite, nextJS) tranforms our class names and generates unique class names that don’t clash.<br/>So, we never have to worry about name clashes anymore.<br/></li></ul><ul id="e7eeab43-c89e-4145-945d-5409b645941e" class="bulleted-list"><li style="list-style-type:disc">CSS Modules enable local scoping of styles. Each React component gets its own unique CSS class names, ensuring that styles don&#x27;t leak or clash with other components.</li></ul><ul id="d904b94c-7900-455c-be99-d288e4490dda" class="bulleted-list"><li style="list-style-type:disc">Since class names are scoped locally, you can use simple and descriptive names</li></ul></details></li></ul></div></details><h2 id="a17d7d7a-53f1-4c69-81cb-7c41012d0fb4" class="">Tailwind</h2><p id="70639c79-d5cc-4bc1-9122-dc00d3edcd55" class="">CSS framework which uses utility classes for styling.<br/>utility class- a CSS class written for one single purpose.<br/></p><ul id="e3a68c29-4a6e-477e-86fb-03e686141eb7" class="bulleted-list"><li style="list-style-type:disc">for installation, go to taiwind → installation → framework guides.<br/>also install <br/><em>Tailwind CSS intelliSence</em> extension for vsCode</li></ul><ul id="45b22f0c-5c4f-410e-a5a3-07eb8b4efde8" class="bulleted-list"><li style="list-style-type:disc"><strong>Responsiveness: </strong><br/>By default, tailwind uses mobile first breakpoint system.<br/>what that means is <br/><ul id="9ee29967-28b9-44b6-8a54-a787d4b3b53e" class="bulleted-list"><li style="list-style-type:circle">‘<strong>sm</strong>’ breakpoint (i.e 640px) will translate to<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="086ab42f-99d5-46da-af87-4c7b6552c1f6" class="code"><code class="language-CSS">@media (min-width: 640px) {
+  /* CSS styles go here */
+}</code></pre><p id="a0bed5e7-7459-4246-937e-7f9bf531f7b7" class="">which means CSS will only be applied when the viewport(screen) width is <strong>640 pixels or wider</strong>.</p></li></ul><ul id="ee5afdb3-c14b-4f07-a73a-0ad364edbb46" class="bulleted-list"><li style="list-style-type:circle">unprefixed utilities take effect on all screen sizes, while prefixed utilities take effect only take effect at the specified breakpoint or above<ul id="0eb87e47-5bec-4ca1-bd79-d7bf60b4b914" class="toggle"><li><details open=""><summary>Example</summary><p id="57e80e66-ecae-4464-8d87-25057797cd7f" class="">To center text in smaller screens</p><ul id="c35d905c-e0c5-4094-bc6c-ed6e86ccee00" class="bulleted-list"><li style="list-style-type:disc"><code>&lt;div class=&quot;sm:text-center&quot;&gt;&lt;/div&gt;</code> ❌<br/>this will center the text for screens equal to and larger than 640px. On smaller screens, it will be left aligned (default behavior).<br/></li></ul><ul id="53d85ffb-60cb-488f-b8c0-783c87c270cf" class="bulleted-list"><li style="list-style-type:disc"><code>&lt;div class=&quot;text-center sm:text-left&quot;&gt;&lt;/div&gt;</code> ✅<br/>this will center text for smaller mobile size screens and left align it on screens 640px or wider<br/></li></ul></details></li></ul></li></ul><ul id="ac950980-b1a3-4583-a593-dd02738685ef" class="bulleted-list"><li style="list-style-type:circle">sm: 640 px and wider : tablet<br/>lg: 1024 px and wider : laptop<br/>xl: 1280 px and wider : desktop<br/></li></ul></li></ul><ul id="d699cc22-be02-43af-bf87-981e7b6369d2" class="bulleted-list"><li style="list-style-type:disc">Some common utility classes<ul id="1d8d6df3-9977-48aa-ab02-6733339f5e89" class="toggle"><li><details open=""><summary>Spacing</summary><ul id="d3f0781d-7204-4ec0-8834-b55d6cf5d19e" class="bulleted-list"><li style="list-style-type:disc"><span style="border-bottom:0.05em solid">paddings</span><p id="f0900aa8-7f1a-4c1e-b722-d90587497d56" class="">p-[number]- padding</p><p id="10175037-6474-4fdc-aa12-4fbb898b8576" class="">px-[number]- padding horizontal</p><p id="77f5d7e7-95aa-4216-b5fc-bde1286f8f38" class="">py-[number]- padding vertical</p><p id="aadedb5f-c9bf-4987-8ef5-5c773a69e567" class="">pt-[number]- padding top</p><p id="673ac2d9-fe88-42b6-8c35-c539b8c6749d" class="">pr-[number]- padding right</p><p id="e74f400c-3f35-43b3-aa57-e2b6acac440c" class="">pb-[number]- padding bottom</p><p id="710f7073-f28c-4ce3-8981-e5b71c210e9a" class="">pl-[number]- padding left</p></li></ul><ul id="c1a24245-6318-43bb-9478-2dca07ae0bcd" class="bulleted-list"><li style="list-style-type:disc"><span style="border-bottom:0.05em solid">margins</span><p id="04c4ac21-d39f-4a3f-8885-0ef7edd9a129" class="">m-[number]- margin</p><p id="e1979ef9-495b-4337-964e-62b7a5c3b0ea" class="">mx-[number]- margin horizontal</p><p id="600a1bef-4081-4a39-bfa1-634ffc88a203" class="">my-[number]- margin vertical</p><p id="40fcde6f-c78c-458e-bdf3-bd74253a4267" class="">mt-[number]- margin top</p><p id="963a1280-6e86-4205-be0c-00656cf5b8fb" class="">mr-[number]- margin right</p><p id="05369a5e-3dc3-4f48-a8ad-23dde74e700e" class="">mb-[number]- margin bottom</p><p id="ed12f8f5-2846-49f6-96e2-324f8ee274f8" class="">ml-[number]- margin left</p></li></ul></details></li></ul><ul id="711512b4-d1b0-44ed-b8e4-2e4f04628c9d" class="toggle"><li><details open=""><summary>Text</summary><ul id="dfa52c57-b01e-4687-9fab-e00572cf1879" class="bulleted-list"><li style="list-style-type:disc"><span style="border-bottom:0.05em solid">size</span><p id="894ab510-f3d4-47bd-88a7-9cce9460a3c8" class="">text-xs</p><p id="1aa465c4-9b60-4c47-8dd8-17c33202751b" class="">text-sm</p><p id="2b9cbe16-e29b-4b45-bd2a-e1fd3d4561b0" class="">text-base</p><p id="406c6e23-ce0f-4e0d-b94f-0e745e9e5cad" class="">text-lg</p><p id="9522dcca-56cc-4161-88ac-b70aafbfa643" class="">text-xl</p><p id="6badde15-2ab4-4737-97a7-54867cc19668" class="">text-2xl</p><p id="236c5d8c-5f80-41fe-be34-7679ab130e06" class="">text-3xl and  so on</p></li></ul><ul id="ceaf4102-5429-4902-90de-7aea390aca35" class="bulleted-list"><li style="list-style-type:disc"><span style="border-bottom:0.05em solid">color</span><p id="a0da409b-44fe-4e06-b779-a6e9fd148167" class="">text-[color]</p></li></ul><ul id="73b05608-be0a-4bdc-8376-a4cda35d3440" class="bulleted-list"><li style="list-style-type:disc"><span style="border-bottom:0.05em solid">thickness</span><p id="c3242d2f-1baa-42ba-b7af-7c963b6e83b5" class="">font-thin</p><p id="b66631e6-0aaf-40a7-bc1d-346ba06e021c" class="">font-light</p><p id="ea79c4bd-5d05-437e-8ac9-5117f47c7546" class="">font-normal</p><p id="474a82dd-5425-4f7c-843e-45f342122e1b" class="">font-medium</p><p id="4351c04b-c119-4050-b8d3-dc8fe5277286" class="">font-bold</p></li></ul></details></li></ul><ul id="ff738f60-33d8-4348-a274-f47f233604fd" class="toggle"><li><details open=""><summary>Background</summary><ul id="e3721469-6497-4b74-9582-f90185e0ce5e" class="bulleted-list"><li style="list-style-type:disc"><span style="border-bottom:0.05em solid">color</span><p id="9c2f74d2-fb99-42a7-89bf-001ff0f6f6ac" class="">bg-[color]</p></li></ul></details></li></ul><ul id="870dbf55-4252-4b17-a2e4-faca9717acac" class="toggle"><li><details open=""><summary>State</summary><ul id="562b1cde-ff5b-4dd4-b3d7-091f977e1ef5" class="bulleted-list"><li style="list-style-type:disc"><span style="border-bottom:0.05em solid">hover</span><p id="c7105220-4f1c-4fee-874d-e716ddce8dc5" class="">hover:[utility-class]<br/><br/><code>className=&quot;bg-sky-500 hover:bg-sky-700&quot;</code></p></li></ul></details></li></ul></li></ul><ul id="e0df2ad5-5733-4149-81e8-9f7e79d4aebe" class="bulleted-list"><li style="list-style-type:disc">You generally,<br/>either create your own library of opinionated components using tailwind <br/>or use some other tailwind based library with ready made components to use.<br/><ul id="bb0d80a3-1737-4f80-baba-69fe05153d5f" class="bulleted-list"><li style="list-style-type:circle">daisy ui - similar to bootstrap (we use classes)</li></ul><ul id="25f4b005-46ed-4bc6-ad6c-d89008febfcc" class="bulleted-list"><li style="list-style-type:circle">chakra ui - similar to material ui (we import components)</li></ul><ul id="64546ace-fa74-4bd1-b58a-122621703082" class="bulleted-list"><li style="list-style-type:circle">shadcn - <ul id="62bb61b2-60f1-421c-bb90-5be35d58bc3a" class="bulleted-list"><li style="list-style-type:square">code for components given by other libraries is inside node_modules, that’s why it’s hard for you to tinker with it.</li></ul><ul id="1ebdc62e-2ef1-481b-95e4-143ed6c38b78" class="bulleted-list"><li style="list-style-type:square">with shadcn, you pick the components you need<br/>copy and paste the code into your project and customize it to your need.<br/></li></ul><ul id="91e30684-18af-4df2-a7b3-acb557686a01" class="bulleted-list"><li style="list-style-type:square">another plus point is that your app doesn&#x27;t get bloated.</li></ul></li></ul><p id="07e7a10d-859b-4ae7-8b88-190138ab9205" class="">Lastly you can also just search for a component written with tailwind online.</p></li></ul></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

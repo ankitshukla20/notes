@@ -1,0 +1,1238 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Recoil deep dive</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-translucentGray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="11f605ba-8273-49a8-b808-3b3cf5df08f2" class="page sans"><header><h1 class="page-title">Recoil deep dive</h1><p class="page-description"></p></header><div class="page-body"><p id="97d81c1c-3f60-4f38-994c-d0e02648ffb9" class="">
+</p><details open=""><summary style="font-weight:600;font-size:1.25em;line-height:1.3;margin:0">Atom (for recap)</summary><div class="indented"><ul id="c7b48f53-c2fd-47d2-8612-529d0f50525c" class="bulleted-list"><li style="list-style-type:disc"><span style="border-bottom:0.05em solid">Problem Statement</span>: In a navbar show count of notifications for different sections of app.<br/>network - 102<br/>jobs - 0<br/>messages - 0<br/>notifications - 12<br/></li></ul><ul id="8a7ad990-dc31-4c43-bf85-d2298d759eea" class="toggle"><li><details open=""><summary>Solution</summary><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="3ecfb453-0b61-477a-b8e1-88c952abdc79" class="code"><code class="language-JavaScript">import { atom } from &quot;recoil&quot;;
+
+export const networkAtom = atom({
+    key: &quot;networkAtom&quot;,
+    default: 102
+});
+
+export const jobsAtom = atom({
+    key: &quot;jobsAtom&quot;,
+    default: 0
+});
+
+export const notificationsAtom = atom({
+    key: &quot;notificationsAtom&quot;,
+    default: 12
+});
+
+export const messagingAtom = atom({
+    key: &quot;messagingAtom&quot;,
+    default: 0
+});</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="bb5a1580-31fd-4608-8bdf-459824d3f62b" class="code"><code class="language-JavaScript">function App() {
+  return &lt;RecoilRoot&gt;
+    &lt;MainApp /&gt;
+  &lt;/RecoilRoot&gt;
+}
+
+function MainApp() {
+  const networkNotificationCount = useRecoilValue(networkAtom)
+  const jobsAtomCount = useRecoilValue(jobsAtom);
+  const notificationsAtomCount = useRecoilValue(notificationsAtom)
+  const messagingAtomCount = useRecoilValue(messagingAtom)
+
+  return (
+    &lt;nav&gt;
+      &lt;button&gt;Home&lt;/button&gt;
+      
+      &lt;button&gt;My network ({networkNotificationCount})&lt;/button&gt;
+      &lt;button&gt;Jobs ({jobsAtomCount})&lt;/button&gt;
+      &lt;button&gt;Messaging ({messagingAtomCount})&lt;/button&gt;
+      &lt;button&gt;Notifications ({notificationsAtomCount})&lt;/button&gt;
+    &lt;/nav&gt;
+  )
+}</code></pre></details></li></ul><p id="1d7beac6-5f04-4c52-93b6-e0f756eb4fdb" class="">
+</p><ul id="d9414a93-fa80-4627-aeb1-eff324cb37e8" class="bulleted-list"><li style="list-style-type:disc">A todo app using atoms.</li></ul><ul id="edd0aa4d-cf04-489c-85a8-a64e6d3e0c74" class="toggle"><li><details open=""><summary>App</summary><p id="a773d48f-77a6-4199-b955-ccc462202839" class="">We used recoil to define a state variable to store array of todos, a <em>todoListState</em> atom. Rest of the logic for app is just simple react code.</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="4ee971f7-2dea-439d-b0c3-ef9fc3a52cb9" class="code"><code class="language-JavaScript">// todoList state, which will store all the todos
+const todoListState = atom({
+  key: &#x27;TodoList&#x27;,
+  default: [],
+});
+
+/* Structure of a single todo will be like this: 
+	{  
+		id: 0,
+    text: Do yoga for 30 minutes,
+    isComplete: false,
+   }
+*/</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="c8664d58-7039-4a58-87fc-7071774c2112" class="code"><code class="language-JavaScript">function TodoListApp() {
+  const [todoList, setTodoList] = useRecoilState(todoListState);
+	// get all todos from backend and set the todoListState state 
+
+  return (
+    &lt;&gt;
+      &lt;TodoItemCreator /&gt;    // Component for creating a new todo 
+
+      {todoList.map((t) =&gt; (
+        &lt;TodoItem key={t.id} todo={t} /&gt; // for rendering one todo item
+      ))}
+    &lt;/&gt;
+  );
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="9ecd621f-a825-4709-9320-5112fd6eac23" class="code"><code class="language-JavaScript">let count = 0; // for creating id of todo
+
+function TodoItemCreator() {
+  const [todoText, setTodoText] = useState(&#x27;&#x27;); 
+  const setTodoList = useSetRecoilState(todoListState);
+
+	// adding todo to todolist state
+  const handleSubmit = (e) =&gt; {    
+		e.preventDefault();
+		const newTodo = {
+        id: count++,
+        text: todo,
+        isComplete: false,
+      };
+		// post this new todo on to the backend
+
+		// update localstate
+    setTodoList((oldTodoList) =&gt; [
+      ...oldTodoList,
+      newTodo,
+    ]);
+
+    setTodoText(&#x27;&#x27;);
+  };
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input 
+				type=&quot;text&quot; 
+				value={todoText} 
+				onChange={(e) =&gt; setTodoText(e.target.value)} 
+			/&gt;
+      &lt;button type=&quot;submit&quot;&gt;Add&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="6324ee2b-b2b1-4af8-8f40-2dab93bdc5e7" class="code"><code class="language-JavaScript">function replaceItemAtIndex(arr, index, newValue) {
+  return [...arr.slice(0, index), newValue, ...arr.slice(index + 1)];
+}
+
+function removeItemAtIndex(arr, index) {
+  return [...arr.slice(0, index), ...arr.slice(index + 1)];
+}
+
+// todo is recieved in props
+function TodoItem({todo}) {
+  const [todoList, setTodoList] = useRecoilState(todoListState);
+  const index = todoList.findIndex((listItem) =&gt; listItem === todo);
+	
+	// states local to this component
+	const [isEditing, setIsEditing] = useState(false);
+  const [todoText, setTodoText] = useState(todo.text);
+
+	// to edit a todo from todolist state
+  const editTodoText = (e) =&gt; {
+		const editedTodo = {  // destructure todo recieved in the props
+      ...todo,               
+      text: e.target.value,
+    }
+
+		/* put this editedTodo on the backend, 
+			 pass the editedTodo in the body to the backend with todo.id
+		*/
+
+		// update localstate
+		const newList = replaceItemAtIndex(todoList, index, editedTodo);
+    setTodoList(newList);
+		
+		setIsEditing(false);
+  };
+
+	// to mark a todo as completed or not completed
+  const toggleTodoCompletion = () =&gt; {
+		const updatedTodo = {  // destructure todo recieved in the props
+      ...todo,
+      isComplete: !todo.isComplete,
+    };
+
+		/* put this updatedTodo on the backend, 
+			 pass the updatedTodo.isComplete property to the backend with todo.id
+		*/
+
+		// update localstate
+		const newList = replaceItemAtIndex(todoList, index, updatedTodo );
+    setTodoList(newList);
+  };
+
+	// to delete a todo from todolist state
+  const deleteTodo = () =&gt; {		
+		// delete this todo from backend, pass todo.id
+
+		//update localstate
+		const newList = removeItemAtIndex(todoList, index);
+    setTodoList(newList);
+  };
+
+  return (
+     &lt;div&gt;
+      {isEditing ? (
+        &lt;&gt;
+          &lt;input
+            type=&quot;text&quot;
+            value={todoText}
+            onChange={(e) =&gt; setTodoText(e.target.value)}
+          /&gt;
+          &lt;button onClick={editTodoText}&gt;Save&lt;/button&gt;
+        &lt;/&gt;
+      ) : (
+        &lt;&gt;
+          &lt;span&gt;{todo.text}&lt;/span&gt;
+          &lt;input
+            type=&quot;checkbox&quot;
+            checked={todo.isComplete}
+            onChange={toggleTodoCompletion}
+          /&gt;
+          &lt;button onClick={() =&gt; setIsEditing(true)}&gt;✏️&lt;/button&gt;
+          &lt;button onClick={deleteTodo}&gt;❌&lt;/button&gt;
+        &lt;/&gt;
+      )}
+    &lt;/div&gt;
+  );
+}</code></pre></details></li></ul></div></details><details open=""><summary style="font-weight:600;font-size:1.25em;line-height:1.3;margin:0">Selector</summary><div class="indented"><p id="e35b56ff-bf7d-4977-8098-22cc8299f024" class="">A <strong>selector</strong> represents a piece of <strong>derived state</strong>. <br/>Think of derived state as the output of a pure function that takes one or more pieces of state (atoms or other selectors) as input.<br/></p><p id="4db0ed02-9fd8-47fc-b3c2-4c40eb83e3ef" class="">
+</p><ul id="05a43be1-0102-4c28-beeb-e13e23f2cec5" class="bulleted-list"><li style="list-style-type:disc">Syntax for selector<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="4ffa42ef-a791-4c50-911f-3853b62373ac" class="code"><code class="language-JavaScript">import { selector } from &#x27;recoil&#x27;;
+
+const mySelector = selector({
+  key: &#x27;mySelector&#x27;,
+  get: ({ get }) =&gt; {
+    const valueA = get(atomA);
+    const valueB = get(atomB);
+    return valueA + valueB;
+  },
+});</code></pre><p id="6fd2f469-a819-43b2-82f1-a48a17b876ec" class="">key should be unique<br/><br/><strong><mark class="highlight-red">get</mark></strong><mark class="highlight-red"> </mark><mark class="highlight-default">- pure function, it recieves an object with </mark><strong><mark class="highlight-default">get</mark></strong><mark class="highlight-default"> function<br/><br/></mark><strong><mark class="highlight-default">get</mark></strong><mark class="highlight-default"> - function that can be used to retrieve the current value of other atoms or selectors</mark></p><p id="4a4e9469-a5a9-486e-8c66-d978e3498cb5" class="">Selectors are primarily used for reading the state, so inside components, we use <strong>useRecoilValue(mySelector)</strong> hook mostly.</p></li></ul><p id="44873538-9928-4fc2-b68e-511a50cbd8b3" class="">
+</p><ul id="54473ad6-c35e-4d24-a94c-fbad19ec583f" class="bulleted-list"><li style="list-style-type:disc">Add a me icon in prev problem statement which shows sum of all pings.</li></ul><ul id="a61ed97a-ae04-45ad-90e6-efde5f130fc2" class="toggle"><li><details open=""><summary>Solution</summary><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="06de1d36-a137-46f9-9e03-60d32f9dc4ef" class="code"><code class="language-JavaScript">// inside atoms.js file
+export const totalNotificationSelector = selector({
+    key: &quot;totalNotificationSelector&quot;,
+    get: ({get}) =&gt; {
+        const networkAtomCount = get(networkAtom);
+        const jobsAtomCount = get(jobsAtom);
+        const notificationsAtomCount = get(notificationsAtom);
+        const messagingAtomCount = get(messagingAtom);
+        return networkAtomCount + jobsAtomCount + notificationsAtomCount + messagingAtomCount;
+    }
+})</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="7d2d3a14-763e-4186-8ca8-7fa812871215" class="code"><code class="language-JavaScript">function MainApp() {
+  //....
+  const totalNotificationCount = useRecoilValue(totalNotificationSelector);
+
+  return (
+    &lt;nav&gt;
+      //....
+      &lt;button&gt;Me ({totalNotificationCount})&lt;/button&gt;
+    &lt;/nav&gt;
+  )
+}</code></pre></details></li></ul><p id="85d16f6d-77a3-4f1d-a415-f9d209a97118" class="">
+</p><ul id="fa93d1af-324e-4d52-bf73-d52f49fce550" class="bulleted-list"><li style="list-style-type:disc">Add a way to filter todo list based on completed property</li></ul><ul id="f21de5f1-f8f7-412a-b5ee-15c6d7442f30" class="toggle"><li><details open=""><summary>App</summary><p id="6342ebea-1bc4-4fb1-9ca0-6c972c58337f" class="">Create an atom (state variable) which will tell what to render</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="3b9ef5d1-72f6-4357-8dd3-edbfd591cafd" class="code"><code class="language-JavaScript">// in atoms.js file
+const todoListFilterState = atom({
+  key: &#x27;TodoListFilter&#x27;,
+  default: &#x27;Show All&#x27;,
+});
+
+/* 
+	filters we will be using
+	&quot;Show All&quot;, &quot;Show Completed&quot;, &quot;Show Uncompleted&quot; 
+*/</code></pre><p id="a798d272-a3b6-4688-98e2-134f8a9be612" class="">Create a selector which will take <em>todoListFilterState</em> and <em>todoListState </em>as inputs and returns a filtered todo list</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="44ccd28d-20ab-4a1a-b91e-49bad027f81d" class="code"><code class="language-JavaScript">// in atoms.js file
+const filteredTodoListState = selector({
+  key: &#x27;FilteredTodoList&#x27;,
+  get: ({get}) =&gt; {
+    const filter = get(todoListFilterState);
+    const list = get(todoListState);
+
+    switch (filter) {
+      case &#x27;Show Completed&#x27;:
+        return list.filter((item) =&gt; item.isComplete);
+      case &#x27;Show Uncompleted&#x27;:
+        return list.filter((item) =&gt; !item.isComplete);
+      default:
+        return list;
+    }
+  },
+});</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="31ed81cd-284b-4ba2-8e79-7859b5a78db1" class="code"><code class="language-JavaScript">function TodoList() {
+	const setTodoList = useSetRecoilState(todoListState);
+	// get all todos from backend and set the todoListState state 
+
+  // changed from todoListState to filteredTodoListState
+  const todoListToRender = useRecoilValue(filteredTodoListState);
+
+  return (
+    &lt;&gt;
+      &lt;TodoListFilters /&gt;
+      &lt;TodoItemCreator /&gt;
+
+      {todoListToRender.map((todoItem) =&gt; (
+        &lt;TodoItem item={todoItem} key={todoItem.id} /&gt;
+      ))}
+    &lt;/&gt;
+  );
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="a2c3f4f8-67e5-4387-9d5b-75f40cfca1b4" class="code"><code class="language-JavaScript">function TodoListFilters() {
+  const [filter, setFilter] = useRecoilState(todoListFilterState);
+
+  const updateFilter = ({target: {value}}) =&gt; {
+    setFilter(value);
+  };
+
+  return (
+    &lt;&gt;
+      Filter:
+      &lt;select value={filter} onChange={updateFilter}&gt;
+        &lt;option value=&quot;Show All&quot;&gt;All&lt;/option&gt;
+        &lt;option value=&quot;Show Completed&quot;&gt;Completed&lt;/option&gt;
+        &lt;option value=&quot;Show Uncompleted&quot;&gt;Uncompleted&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/&gt;
+  );
+}</code></pre></details></li></ul></div></details><details open=""><summary style="font-weight:600;font-size:1.25em;line-height:1.3;margin:0">Asynchronous data queries</summary><div class="indented"><ul id="0e52c01d-3adc-4888-950d-519907d0f961" class="bulleted-list"><li style="list-style-type:disc">Updated Problem Statement: Now you are getting the notification counts from backend in an object.</li></ul><ul id="cd21b04a-cdcb-44c3-8644-51190ced3dee" class="toggle"><li><details open=""><summary>Solution (first principle)</summary><p id="fec5db1a-19aa-4386-ba58-06571d290bdc" class="">Define state using atoms and selctors and make asynchronous backend calls using useEffect</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="eeccac12-d8fa-46d9-b2ba-82a7a8e2fbad" class="code"><code class="language-JavaScript">import { atom, selector } from &quot;recoil&quot;;
+
+// state for all the notification counts
+export const notifications = atom({
+    key: &quot;networkAtom&quot;,
+    default: {
+        network: 0, 
+        jobs: 0, 
+        messaging: 0, 
+        notifications: 0,
+    }
+});
+
+// selector to return the sum of all notification counts
+export const totalNotificationSelector = selector({
+    key: &quot;totalNotificationSelector&quot;,
+    get: ({get}) =&gt; {
+        const allNotifications = get(notifications);
+        return allNotifications.network + 
+        allNotifications.jobs + 
+        allNotifications.notifications + 
+        allNotifications.messaging;
+    }
+});</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="e549edc9-652f-43df-add2-e2ef573f961c" class="code"><code class="language-JavaScript">function MainApp() {
+  const [networkCount, setNetworkCount] = useRecoilState(notifications)
+  const totalNotificationCount = useRecoilValue(totalNotificationSelector);
+
+  useEffect(() =&gt; {
+    axios.get(&quot;https://sum-server.100xdevs.com/notifications&quot;)
+      .then(res =&gt; {
+        setNetworkCount(res.data)
+      })
+  }, [])
+
+  return (
+    &lt;&gt;
+      &lt;button&gt;Home&lt;/button&gt;
+      
+      &lt;button&gt;My network ({networkCount.networks})&lt;/button&gt;
+      &lt;button&gt;Jobs ({networkCount.jobs})&lt;/button&gt;
+      &lt;button&gt;Messaging ({networkCount.messaging})&lt;/button&gt;
+      &lt;button&gt;Notifications ({networkCount.notifications})&lt;/button&gt;
+
+      &lt;button&gt;Me ({totalNotificationCount})&lt;/button&gt;
+    &lt;/&gt;
+  )
+}
+</code></pre></details></li></ul><ul id="bf68e8ec-17b4-4503-a77d-874cf8bbf82a" class="toggle"><li><details open=""><summary>Solution (recoil way)</summary><p id="bcb45bc7-8420-4cbc-b7db-c0595ef79c98" class="">We can pass a synchronous functoin, to an atom default key, which will return the initial state value. But we can’t pass asynchronous functions</p><p id="0f3b8fb8-11ae-4f80-b4db-37b6c349c4d6" class="">Selectors can be used as one way to incorporate asynchronous data into the Recoil data-flow graph. <br/>Return a <br/><em>Promise to a value</em> instead of the <em>value</em> itself from a selector <code>get</code> callback.</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="5894e411-673e-4e54-9be4-6acfbd35b60e" class="code"><code class="language-JavaScript">// atoms.js
+import { atom, selector } from &quot;recoil&quot;;
+import axios from &quot;axios&quot;;
+
+// we initialize state with object fetched from backend 
+export const notifications = atom({
+    key: &quot;networkAtom&quot;,
+    default: selector({
+			key: &quot;networkSelector&quot;,
+			get: async() =&gt; {
+				const res = await axios.get(&quot;https://sum-server.100xdevs.com/notifications&quot;);
+				return res.data;
+			}
+		})
+});
+
+// selector to return the sum of all notification counts
+export const totalNotificationSelector = selector({
+    key: &quot;totalNotificationSelector&quot;,
+    get: ({get}) =&gt; {
+        const allNotifications = get(notifications);
+        return allNotifications.network + 
+        allNotifications.jobs + 
+        allNotifications.notifications + 
+        allNotifications.messaging;
+    }
+});</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="21955202-a92e-4852-aebb-74570da5cbce" class="code"><code class="language-JavaScript">function MainApp() {
+  const networkCount = useRecoilValue(notifications)
+  const totalNotificationCount = useRecoilValue(totalNotificationSelector);
+
+  return (
+    &lt;&gt;
+      &lt;button&gt;Home&lt;/button&gt;
+      
+      &lt;button&gt;My network ({networkCount.networks})&lt;/button&gt;
+      &lt;button&gt;Jobs ({networkCount.jobs})&lt;/button&gt;
+      &lt;button&gt;Messaging ({networkCount.messaging})&lt;/button&gt;
+      &lt;button&gt;Notifications ({networkCount.notifications})&lt;/button&gt;
+
+      &lt;button&gt;Me ({totalNotificationCount})&lt;/button&gt;
+    &lt;/&gt;
+  )
+}</code></pre><p id="89a40aba-5346-46f5-8b95-9eccc4dd6d19" class="">You can show Loading before the promise resolves</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="2683f6e1-6d79-4216-88ea-d23bba8d3b9c" class="code"><code class="language-JavaScript">function App() {
+  return (
+		&lt;RecoilRoot&gt;
+			&lt;Suspense fallback={&lt;div&gt;Loading...&lt;/div&gt;}&gt;
+		    &lt;MainApp /&gt;
+			&lt;/Suspense&gt;
+	  &lt;/RecoilRoot&gt;
+	);
+}</code></pre><p id="adbd8ece-3727-4790-ba28-4a6c84eddfe4" class="">We can also use <strong>useRecoilStateLoadable</strong>, <strong>useRecoilValueLoadable</strong> hooks</p></details></li></ul><p id="39c70ffa-20ce-4b4c-8a56-829329e78bc4" class="">
+</p><ul id="f18bace0-fc10-4fb5-ba5d-e3081ab97f02" class="bulleted-list"><li style="list-style-type:disc">Todo app optimization</li></ul><ul id="272e074e-f24b-4cfe-85f6-f0187fc4df7f" class="toggle"><li><details open=""><summary>App</summary><p id="ed12dc5c-afb6-4b44-805c-d5ec37c6e109" class="">Can fetch todoList when initializing the <em>todoListState</em></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="05f63998-44f9-4a72-ae08-7d2409a2a316" class="code"><code class="language-JavaScript">const todoListState = atom({
+  key: &#x27;TodoList&#x27;,
+  default: selector({
+		key: &quot;TodoListSelector&quot;,
+		get: async() =&gt; {
+				/* fetch todoList array				
+					 return todoList array
+				*/
+			}
+	})
+});</code></pre></details></li></ul><p id="8e3406e6-f3de-42dc-9bec-5a377974e4c8" class="">
+</p><ul id="3e10ea2d-5001-48aa-aec0-ed18498888e0" class="toggle"><li><details open=""><summary><strong>useRecoilStateLoadable/ useRecoilValueLoadable</strong></summary><ul id="a0dbbfd3-03ce-4505-9abc-1e601b9b65d4" class="bulleted-list"><li style="list-style-type:disc">used for showing error or loading<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="e1955e52-f311-4338-883b-40f94384510e" class="code"><code class="language-JavaScript">const [todoLoadable, setTodo] = useRecoilStateLoadable(todoListState);</code></pre><p id="bf7353fc-5752-40cb-8b5f-9c4acc5bff23" class="">this hook returns a <em>loadable</em> in place of current state, and a setter function<br/><br/><em>setTodo</em> is normal setter function which is used for setting state.</p></li></ul><ul id="0ac79af1-e0f3-4b62-8e7b-973c09083eba" class="bulleted-list"><li style="list-style-type:disc">Loadable object<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="e2c4b1e4-a725-4f56-9b09-42b199d6d84e" class="code"><code class="language-JavaScript">if (todoLoadable.state === &#x27;loading&#x27;) {
+    return &lt;div&gt;Loading...&lt;/div&gt;;
+}
+
+if (todoLoadable.state === &#x27;hasError&#x27;) {
+		return &lt;div&gt;Error: {todoLoadable.contents.message}&lt;/div&gt;;
+}
+
+return &lt;div&gt;{todoLoadable.contents.text}&lt;/div&gt;;</code></pre><p id="a90b0f1a-1d8c-4d10-a0ea-f4f3d5283c7c" class="">Loadable object has 2 properties state and contents<br/>state - can be <br/><em>&#x27;hasValue&#x27;, &#x27;hasError&#x27;, &#x27;loading&#x27;</em> <br/>contents <br/>  - actual value if state is <br/><em>hasValue<br/>  - <br/></em>error object that was thrown, if state is <em>hasError<br/>  - <br/></em>promise of a value, if state is <em>loading</em></p></li></ul><ul id="d5456d0c-81bf-4e53-a1a3-26becaa198b3" class="bulleted-list"><li style="list-style-type:disc">useRecoilValueLoadable will return only the loadable object<br/>to be used in place of useRecoilValue<br/></li></ul><ul id="852220b4-7d26-4b80-85b3-ddb2ab3c5eed" class="bulleted-list"><li style="list-style-type:disc">useRecoilValue() ⇒ useRecoilValueLoadable()<br/>useRecoilState() ⇒ useRecoilStateLoadable()<br/></li></ul></details></li></ul></div></details><p id="95cd0e7d-3f9e-4266-838e-0b16899acc67" class="">
+</p><hr id="9cd06444-be72-4306-9105-99275babce9b"/><details open=""><summary style="font-weight:600;font-size:1.25em;line-height:1.3;margin:0">Selector Family</summary><div class="indented"><ul id="40e4fc16-7808-4cc6-be42-5191337955b3" class="bulleted-list"><li style="list-style-type:disc">Selector Family is like selector but it allows you to pass parameters to the <code>get</code> callback.</li></ul><p id="5e21eda4-ae4e-4e05-8f26-366be28e51ee" class="">
+</p><p id="94910e8c-30b2-4495-a69d-78ff09825a9c" class="">Example: </p><ul id="5b83c1c5-8d5b-4667-87f9-96049058e451" class="bulleted-list"><li style="list-style-type:disc">Atom<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="dc3c1147-20c3-4b4c-a6b1-835d3391f302" class="code"><code class="language-JavaScript">const myNumberState = atom({
+  key: &#x27;MyNumber&#x27;,
+  default: 2,
+});</code></pre></li></ul><ul id="dbda052d-cdf7-48ad-816b-71cc655090ea" class="bulleted-list"><li style="list-style-type:disc">Selector <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="fb4c9a43-9ca6-4b8a-8b16-412283beca52" class="code"><code class="language-JavaScript">const doubledState = selector({
+	key: &#x27;DoubledNumber&#x27;,
+	get: ({get}) =&gt; {
+		const num = get(myNumberState);
+		return num*2;
+	}
+});</code></pre></li></ul><ul id="7ef946a9-4c13-49de-ac94-4765d60e7567" class="bulleted-list"><li style="list-style-type:disc">Selector Family <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="ed2bd16a-d0bf-408f-868e-6e9307b81150" class="code"><code class="language-JavaScript">const multipliedState = selectorFamily({
+	key: &#x27;MultipliedNumber&#x27;,
+	get: (multiplier) =&gt; ({get}) =&gt; {
+		const num = get(myNumberState);
+		return num * multiplier;
+	}
+})</code></pre></li></ul><ul id="3b6c20e6-d3b6-4a00-b14f-d28d252537db" class="bulleted-list"><li style="list-style-type:disc">Component<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="1318d19c-c1b5-4410-ac1b-00ddd0ea2279" class="code"><code class="language-JavaScript">function Component() {
+	const [num, setNum] = useRecoilValue(myNumberState); 
+	// num is 2 by default, can change it&#x27;s value using set if want to.
+
+	const doubledNum = useRecoilValue(doubledState);
+	const multipliedNum = useRecoilValue(multipliedState(100));
+
+	//...rest of the code	
+}</code></pre></li></ul></div></details><details open=""><summary style="font-weight:600;font-size:1.25em;line-height:1.3;margin:0">Atom Family</summary><div class="indented"><ul id="d34c3308-e267-4e45-aec0-72a3f10d308b" class="bulleted-list"><li style="list-style-type:disc">atomFamily can create an atom for us if we pass an argument to it.</li></ul><ul id="96cf1e22-0fb0-4f89-a637-8888b7b3e4f4" class="bulleted-list"><li style="list-style-type:disc">atomFamily can use that argument to initialize the said atom.</li></ul><ul id="b1e93630-a3b8-4806-b43d-986d3b5fa5d7" class="bulleted-list"><li style="list-style-type:disc">Syntax of atomFamily<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="f1c4ead6-c0ed-4223-9498-8eab5b1e934f" class="code"><code class="language-JavaScript">const elementState = atomFamily({
+	key: &quot;ElementState&quot;,
+	deafult: (param) =&gt; defaultBasedOnParam;
+  // default: [0, 0]
+});
+
+// inside a component
+	// atom family creates an atom with key let&#x27;s say &quot;ElementState_1&quot;
+	const [element, setElement] = useRecoilState(elementState(argument));
+
+// inside another component
+	// getting the state from atom with key &quot;ElementState_1&quot;
+	const [element, setElement] = useRecoilState(elementState(argument));</code></pre><p id="d9261aed-f5dc-43db-8d0d-e67d4f608a5b" class="">default here is a synchronous function, for asynchronous function calls use selectorFamily</p><p id="fb98a4a7-00fb-423f-a13e-8f1e66139137" class="">atomFamily will not create a new atom for same argument passed twice or more</p><ul id="327df69c-ba79-47fd-97c5-66cdedcec80f" class="bulleted-list"><li style="list-style-type:circle">on the first instance, an atom will be created with a uniquely generated id</li></ul><ul id="5c8fd93f-a619-4505-976b-d18368859715" class="bulleted-list"><li style="list-style-type:circle">on the next intance(s), that same atom will be used</li></ul><p id="600f3681-4281-4a17-82c8-8cacbbc05cec" class="">
+</p></li></ul><ul id="4c83653e-08d8-4337-8269-f87d509ec78e" class="bulleted-list"><li style="list-style-type:disc">In our current Todo app, we created a single atom(state) to store all the todos.</li></ul><ul id="1feddcb8-cd45-4d4e-a762-2fd4cb1b2907" class="bulleted-list"><li style="list-style-type:disc">So now we change our code to manage state differently on our front-end,  using atomFamily() and selectorFamily().</li></ul><ul id="d955155a-5c8f-4895-bbba-71ca8d52a984" class="bulleted-list"><li style="list-style-type:disc">Give every todo element it’s own state.</li></ul><ul id="c4fb660a-7b3a-47b3-831e-6f2e91c01690" class="bulleted-list"><li style="list-style-type:disc"><strong>atomFamily</strong> to create atoms dynamically and <strong>selctorFamily</strong> for making asynchronous calls</li></ul><ul id="007430ef-9a33-44e5-96db-bd410f8dfe53" class="toggle"><li><details open=""><summary>App </summary><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="3dfb6089-ef81-4388-b6b5-8792862d7c1d" class="code"><code class="language-JavaScript">// using to store ids of todos
+const todoListState = atom({
+  key: &#x27;TodoList&#x27;,
+  default: selector({
+		key: &quot;TodoListSelector&quot;,
+		get: async() =&gt; {
+				// fetch todoList array from backend
+				const todoList = todos.map((t) =&gt; t.id);		
+				return todoList;
+			}
+	})
+});</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="25f15fe8-7898-401e-b182-eb0e4be0f664" class="code"><code class="language-JavaScript">// using atom family to create a sepearate state for each todo item
+export const todoFamily = atomFamily({
+  key: &#x27;todoFamily&#x27;,
+  default: selectorFamily({
+		key: &quot;todoSelectorFamily&quot;
+		get: (id) =&gt; async({get}) =&gt; {
+				// fetch todo from backend with help of id
+				return todo;
+		  },
+	})
+});</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="98bcfe3d-afa6-4bdf-9534-ae4111bde4e8" class="code"><code class="language-JavaScript">function TodoListApp() {
+  const [todoList, setTodoList] = useRecoilState(todoListState); 
+
+  return (
+    &lt;&gt;
+      &lt;TodoItemCreator /&gt;    // Component for creating a new todo 
+
+      {todoList.map((ti) =&gt; (
+        &lt;TodoItem key={ti} todoId={ti} /&gt; // for rendering one todo item
+      ))}
+    &lt;/&gt;
+  );
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="e3bb53bb-dd07-4425-81f0-49e09acd5c87" class="code"><code class="language-JavaScript">function TodoItemCreator() {
+	//...code
+
+    setTodoList((oldTodoList) =&gt; [
+      ...oldTodoList,
+      newTodo.id,
+    ]);
+
+	//...code
+}</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="73b08fcd-7db5-4b20-831f-adf42df70f9d" class="code"><code class="language-JavaScript">function removeItemAtIndex(arr, index) {
+  return [...arr.slice(0, index), ...arr.slice(index + 1)];
+}
+
+// todo is recieved in props
+function TodoItem({todoID}) {
+	const [todo, setTodo] = useRecoilState(todoFamily(id));
+
+  const [todoList, setTodoList] = useRecoilState(todoListState); // for delete method
+	
+	// states local to this component
+	const [isEditing, setIsEditing] = useState(false);
+  const [todoText, setTodoText] = useState(todo.text);
+
+	// to edit a todo from todolist state
+  const editTodoText = (e) =&gt; {
+		const editedTodo = {  // destructure todo recieved in the props
+      ...todo,               
+      text: e.target.value,
+    }
+
+		/* put this editedTodo on the backend, 
+			 pass the editedTodo in the body to the backend with todo.id
+		*/
+
+		// update localstate
+    setTodo(editedTodo);
+		
+		setIsEditing(false);
+  };
+
+	// to mark a todo as completed or not completed
+  const toggleTodoCompletion = () =&gt; {
+		const updatedTodo = {  // destructure todo recieved in the props
+      ...todo,
+      isComplete: !todo.isComplete,
+    };
+
+		/* put this updatedTodo on the backend, 
+			 pass the updatedTodo.isComplete property to the backend with todo.id
+		*/
+
+		// update localstate
+    setTodo(updatedTodo);
+  };
+
+	// to delete a todo from todolist state
+  const deleteTodo = () =&gt; {		
+		// delete this todo from backend, pass todo.id
+
+		//update localstate
+		const index = todoList.findIndex((listItem) =&gt; listItem === todo);
+		const newList = removeItemAtIndex(todoList, index);
+
+    setTodoList(newList);
+  };
+
+  return (
+     &lt;div&gt;
+      {isEditing ? (
+        &lt;&gt;
+          &lt;input
+            type=&quot;text&quot;
+            value={todoText}
+            onChange={(e) =&gt; setTodoText(e.target.value)}
+          /&gt;
+          &lt;button onClick={editTodoText}&gt;Save&lt;/button&gt;
+        &lt;/&gt;
+      ) : (
+        &lt;&gt;
+          &lt;span&gt;{todo.text}&lt;/span&gt;
+          &lt;input
+            type=&quot;checkbox&quot;
+            checked={todo.isComplete}
+            onChange={toggleTodoCompletion}
+          /&gt;
+          &lt;button onClick={() =&gt; setIsEditing(true)}&gt;✏️&lt;/button&gt;
+          &lt;button onClick={deleteTodo}&gt;❌&lt;/button&gt;
+        &lt;/&gt;
+      )}
+    &lt;/div&gt;
+  );
+}</code></pre></details></li></ul><p id="4ddaffc6-fcbd-47c3-ba4a-533bb51fd597" class="">
+</p><ul id="429da6e5-6a5b-4667-8c47-302fcf6f9199" class="bulleted-list"><li style="list-style-type:disc">A good use of atomFamily is when elements are on ui only (like excalidraw), i.e they need not to be put on the backend imediatly.<br/>You store it on your backend only if user wants to save their whiteboard.<br/>Any element created in such an app, ideally should have it’s own state(shape, cordinates, textInside), for better state management. Atom for each element can be created dynamically using atomFamily.<br/></li></ul></div></details><p id="7e767998-fed0-42a0-9bf7-439c9ec75113" class="">
+</p><ul id="d556aa3c-d070-4f7b-a2ba-d9201ec5dee1" class="toggle"><li><details open=""><summary>exercise</summary><p id="993dc16f-a1a1-4787-a0f0-9b49c8070ebd" class="">understand how is this gonna make the function sleep for 5 sec</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="864d685e-194a-4613-9c23-6b9d935ffcde" class="code"><code class="language-JavaScript">await new Promise(r =&gt; setTimeout(r, 5000))</code></pre></details></li></ul><p id="2b56320f-2943-4cfb-8390-a8e462724846" class="">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
